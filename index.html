@@ -74,9 +74,10 @@ body.show-floater .overlay {
 
 
 .bookmark {
-    display: block;
+    display: flex;
     background:#fff;
     color: #999;
+    position: relative;
     padding: 20px;
     transition: 0.3s ease all;
     border-bottom: 1px solid #ddd;
@@ -96,6 +97,32 @@ body.show-floater .overlay {
     border-bottom: 0;
 }
 
+.bookmark .img {
+    background-color: #ddd;
+    border-radius: 3px;
+    background-image:url("weird.png");
+    background-size:cover;
+    width: 80px;
+    height: 60px;
+    margin-right: 20px ;
+}
+
+.bookmark .title {
+    display:flex;
+    align-items: center;
+}
+.bookmark .glyphicon-remove{
+    position: absolute;
+    top: 10px;
+    right:10px;
+    color: #eee;
+    font-size: 12px;
+    transition: 0.3s ease color ;
+    cursor: pointer;
+ }
+.bookmark:hover .glyphicon-remove{
+    color: #aaa;
+}
 </style>
 </head>
 <body>
@@ -170,8 +197,14 @@ body.show-floater .overlay {
     }
 
     function fillBookmarksList (bookmarks = []){
-        const bookmarkShtml = bookmarks.map((bookmark) => {
-            return `<a href="a" class="bookmark"> ${bookmark.title} </a>`;
+        const bookmarkShtml = bookmarks.map((bookmark, i) => {
+            return `
+                <a href="#" class="bookmark" data-id="${i}">
+                    <div class="img"></div>
+                    <div class="title"> ${bookmark.title}</div>
+                    <span class="glyphicon glyphicon-remove"></span> 
+                </a>
+                    `;
         }).join("");
 
         bookmarksList.innerHTML = bookmarkShtml;
@@ -185,6 +218,18 @@ body.show-floater .overlay {
 
     }
 
+    function removeBookmark(e) {
+        if (!e.target.matches(".glyphicon-remove")) return;
+
+        const index = e.target.parentNode.dataset.id;
+        bookmarks.splice(index, 1);
+        fillBookmarksList(bookmarks);
+        storeBookmarks(bookmarks);
+    
+    }
+
+
+
     function storeBookmarks(bookmarks = []){
         localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
     }
@@ -192,6 +237,7 @@ body.show-floater .overlay {
 
 
     bookmarkForm.addEventListener('submit', createBookmark);
+    bookmarksList.addEventListener("click", removeBookmark);
 
 
 
