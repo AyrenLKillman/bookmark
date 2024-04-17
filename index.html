@@ -102,7 +102,8 @@ body.show-floater .overlay {
     border-radius: 3px;
     background-image:url("weird.png");
     background-size:cover;
-    width: 80px;
+    background-position: top center;
+    width: 120px;
     height: 60px;
     margin-right: 20px ;
 }
@@ -169,38 +170,52 @@ body.show-floater .overlay {
     const bookmarkForm = document.querySelector(".bookmark-form");
     const bookmarkInput = bookmarkForm.querySelector('input[type=text]');
     const bookmarks = JSON.parse(localStorage.getItem("bookmarks")) || [];
+    const APIURL = "https://opengraph.io/api/1.1/site";
+    const APID = "641b0cce-cb04-4e61-8da5-8eaad8045e96";
+
+
+  
 
     fillBookmarksList(bookmarks);
 
     function createBookmark(e) {
         e.preventDefault();
 
-        //add bookmark to bookmarks
+        if(!bookmarkInput.value){
+            alert("place link in the text box");
+            return;
+        } 
+        const url = encodeURIComponent(bookmarkInput.value)
+
+        fetch(APIURL + '/' + url + "?app_id=" + APID)
+    .then (response => response.json())
+    .then (data => {
+        
         const title = bookmarkInput.value;
         const bookmark = {
-            title: title
+            title: data.hybridGraph.title,
+            image: data.hybridGraph.image,
+            link: data.hybridGraph.url
         };
+
+
         bookmarks.push(bookmark);
         fillBookmarksList(bookmarks);
         storeBookmarks(bookmarks);
         bookmarkForm.reset();
-
-   
-        // const bookmark = document.createElement('a');
-        // bookmark.className = "bookmark";
-        // bookmark.innerText = title;
-        // bookmark.href = 'a';
-        // bookmark.target = '_blank';
-        // bookmarksList.appendChild(bookmark);
-
+    })
+    .catch(error => {
+        alert("something went wrong with your link, please check if your link is spelled correctly")
+    });
+ 
 
     }
 
     function fillBookmarksList (bookmarks = []){
         const bookmarkShtml = bookmarks.map((bookmark, i) => {
             return `
-                <a href="#" class="bookmark" data-id="${i}">
-                    <div class="img"></div>
+                <a href="${bookmark.link}" class="bookmark" data-id="${i}">
+                    <div class="img" style ="background-image:url('${bookmark.image}')"></div>
                     <div class="title"> ${bookmark.title}</div>
                     <span class="glyphicon glyphicon-remove"></span> 
                 </a>
